@@ -1,0 +1,40 @@
+{# Every ContactForm staff page: the banner, then the page. ContactForm::page_wrapper()
+   passes `head` — a title and any of subtitle, breadcrumb, actions and tabs.
+   Autoescaped (the module's config.php). #}
+<div class="cf-app">
+    <div class="cf-banner{% if head.compact %} is-compact{% endif %}">
+        {% if head.breadcrumb %}
+            <nav class="cf-crumbs" aria-label="Breadcrumb">
+                <ol>
+                    {% for crumb in head.breadcrumb %}
+                        <li>{% if crumb.href %}<a href="{{ crumb.href|e('html_attr') }}">{{ crumb.label|e }}</a>{% else %}<span aria-current="page">{{ crumb.label|e }}</span>{% endif %}</li>
+                    {% endfor %}
+                </ol>
+            </nav>
+        {% endif %}
+        <div class="cf-banner-top">
+            <div>
+                <h1 class="cf-banner-title">{{ head.title|e }}</h1>
+                {% if head.subtitle %}<p class="cf-banner-sub">{{ head.subtitle|e }}</p>{% endif %}
+            </div>
+            {% if head.actions %}
+                <div class="cf-banner-actions">
+                    {% for action in head.actions %}
+                        <a href="{{ action.href|e('html_attr') }}" class="cf-btn{% if action.primary %} is-primary{% endif %}"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{ action.label|e }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        {% if head.tabs %}
+            <nav class="cf-tabs" aria-label="Contact forms">
+                {% for tab in head.tabs %}
+                    <a href="{{ tab.href|e('html_attr') }}" class="cf-tab{% if tab.current %} is-current{% endif %}"{% if tab.current %} aria-current="page"{% endif %}>{{ tab.label|e }}</a>
+                {% endfor %}
+                {% if head.back %}<a href="{{ head.back|e('html_attr') }}" class="cf-tab cf-tab-back">View the form</a>{% endif %}
+            </nav>
+        {% endif %}
+    </div>
+    <div class="cf-page">
+        {{ content|raw }}
+    </div>
+</div>

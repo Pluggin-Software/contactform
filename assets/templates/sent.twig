@@ -1,0 +1,21 @@
+{# After a message is sent: ContactForm::rout_index() reading the stash that
+   submit_message() left before it redirected (a bot's message, kept in Spam,
+   is answered the same way). It takes the form's place under the form's own
+   title, so the page keeps its shape. reply_to is the address the message
+   gave, which the notice's Reply-To uses. Autoescaped (the module's config.php). #}
+<div class="cf-public" id="cf-form-{{ form.cf_forms_id }}">
+    {% if form.title %}<h2 class="cf-title">{{ form.title|e }}</h2>{% endif %}
+
+    <div class="cf-sent" role="status" tabindex="-1" data-cf-sent="{{ form.cf_forms_id }}">
+        <svg class="cf-sent-mark" viewBox="0 0 52 52" width="52" height="52" aria-hidden="true" focusable="false">
+            <circle class="cf-sent-ring" cx="26" cy="26" r="24" fill="none"/>
+            <path class="cf-sent-tick" fill="none" d="M15 27.5l7.5 7.5L38 19.5"/>
+        </svg>
+        <div class="cf-sent-body">
+            <h3 class="cf-sent-head">Message sent</h3>
+            <p class="cf-sent-text" dir="auto">{% if form.thank_you %}{{ form.thank_you|e|nl2br }}{% else %}Thank you for writing. It has reached us safely.{% endif %}</p>
+            {% if reply_to %}<p class="cf-sent-reply">Replies will go to <strong dir="auto">{{ reply_to|e }}</strong></p>{% endif %}
+            <a class="cf-sent-again" href="{{ again|e('html_attr') }}">Send another message</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,193 @@
+/* =========================================================================
+ * ContactForm (1.0.0).
+ *
+ * Two halves: .cf-public is the form a visitor sees, kept plain so the theme
+ * shows through; .cf-app is the staff screens, in the ShortLink/CQ palette.
+ * ========================================================================= */
+
+/* ------------------------------------------------------------ the public form */
+.cf-public { max-width: 640px; margin: 0 0 24px; }
+.cf-public .cf-title { margin: 0 0 8px; }
+.cf-public .cf-intro { margin: 0 0 16px; }
+.cf-form { display: flex; flex-direction: column; gap: 18px; }
+.cf-field { display: flex; flex-direction: column; gap: 6px; }
+.cf-field > label, .cf-field legend { font-weight: 600; }
+.cf-field fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.cf-field legend { padding: 0; margin-bottom: 6px; font-size: inherit; border: 0; width: auto; }
+.cf-field input[type=text], .cf-field input[type=email], .cf-field input[type=tel],
+.cf-field select, .cf-field textarea {
+    width: 100%; max-width: 100%; padding: 9px 11px; font: inherit;
+    border: 1px solid #9FB4BA; border-radius: 6px; background: #fff; color: inherit;
+}
+.cf-field textarea { resize: vertical; min-height: 120px; }
+.cf-field input:focus, .cf-field select:focus, .cf-field textarea:focus { outline: 3px solid #1A607A; outline-offset: 1px; }
+.cf-choice { display: flex; align-items: flex-start; gap: 8px; font-weight: 400; margin: 2px 0; cursor: pointer; }
+.cf-choice input { margin-top: 4px; flex: none; width: 18px; height: 18px; }
+.cf-req { color: #A3362A; }
+.cf-help { font-size: 14px; color: #4A626A; }
+.cf-error { font-size: 14px; color: #A3362A; font-weight: 600; }
+.cf-field.has-error input, .cf-field.has-error select, .cf-field.has-error textarea { border-color: #A3362A; }
+.cf-errors { border-left: 4px solid #A3362A; background: #FBEDEB; padding: 10px 14px; margin: 0 0 16px; border-radius: 4px; }
+.cf-errors p, .cf-errors ul { margin: 0; }
+.cf-errors ul { margin-top: 6px; padding-left: 20px; }
+.cf-errors a { color: #A3362A; font-weight: 600; }
+/* The thanks (1.0.5): it takes the form's place under its title, in the
+   theme's own type and ink, with one accent a theme may set (--cf-accent).
+   Focused so a screen reader announces it, but it is not a control, so it
+   draws no focus ring. The mark draws itself once; not for anyone who has
+   asked for less motion. */
+.cf-sent { --cf-accent-ink: var(--cf-accent, #2E7D47);
+    display: flex; gap: 20px; align-items: flex-start; padding: 8px 0 4px; outline: none; }
+/* specific enough to beat a theme's own ring (Sunlit Deep: body.sd
+   :focus-visible); only script focuses it, as tabindex -1 keeps it out of
+   the tab order */
+.cf-public .cf-sent[tabindex="-1"]:focus, .cf-public .cf-sent[tabindex="-1"]:focus-visible { outline: none; }
+.cf-sent-mark { flex: none; width: 52px; height: 52px; color: var(--cf-accent-ink); }
+.cf-sent-ring, .cf-sent-tick { stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.cf-sent-ring { opacity: .3; }
+.cf-sent-body { min-width: 0; display: flex; flex-direction: column; gap: 6px; padding-top: 2px; }
+.cf-sent-head { margin: 0; font-size: 1.375em; line-height: 1.2; }
+.cf-sent-text { margin: 0; max-width: 46ch; overflow-wrap: anywhere; }
+.cf-sent-reply { margin: 4px 0 0; font-size: .875em; opacity: .78; overflow-wrap: anywhere; }
+.cf-sent-reply strong { font-weight: 600; }
+.cf-sent-again { align-self: flex-start; margin-top: 14px; font-size: .9375em; font-weight: 600;
+    color: var(--cf-accent-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.cf-sent-again:hover { text-decoration-thickness: 2px; }
+.cf-sent-again:focus-visible { outline: 3px solid var(--cf-accent-ink); outline-offset: 3px; border-radius: 2px; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .cf-sent-ring { stroke-dasharray: 151; stroke-dashoffset: 151; animation: cf-draw .6s cubic-bezier(.65, 0, .35, 1) forwards; }
+    .cf-sent-tick { stroke-dasharray: 36; stroke-dashoffset: 36; animation: cf-draw .35s cubic-bezier(.65, 0, .35, 1) .45s forwards; }
+    .cf-sent-body > * { opacity: 0; transform: translateY(6px); animation: cf-rise .5s cubic-bezier(.2, .8, .2, 1) forwards; }
+    .cf-sent-body > :nth-child(1) { animation-delay: .25s; }
+    .cf-sent-body > :nth-child(2) { animation-delay: .35s; }
+    .cf-sent-body > :nth-child(3) { animation-delay: .45s; }
+    .cf-sent-body > :nth-child(4) { animation-delay: .55s; }
+}
+@keyframes cf-draw { to { stroke-dashoffset: 0; } }
+@keyframes cf-rise { to { opacity: 1; transform: none; } }
+
+@media (max-width: 480px) {
+    .cf-sent { gap: 14px; }
+    .cf-sent-mark { width: 40px; height: 40px; }
+}
+.cf-closed { padding: 12px 14px; background: #F3F7F8; border-radius: 4px; }
+.cf-actions { margin-top: 4px; }
+.cf-send[aria-disabled="true"] { opacity: .7; cursor: progress; }
+.cf-sr, .cf-hp { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.cf-hp { left: -9999px; }
+
+.cf-toolbar { display: flex; flex-wrap: wrap; gap: 16px; padding: 8px 12px; margin: 0 0 16px; background: #F3F7F8; border: 1px solid #D5E3E7; border-radius: 6px; font-size: 14px; }
+.cf-badge { display: inline-block; padding: 1px 8px; border-radius: 10px; background: #105460; color: #fff; font-size: 12px; font-weight: 600; }
+
+/* ------------------------------------------------------------ staff screens */
+.cf-app {
+    --cf-ink: #12313B; --cf-muted: #4A626A; --cf-line: #D5E3E7; --cf-ground: #F3F7F8;
+    --cf-primary: #105460; --cf-primary-dark: #0B3A42; --cf-danger: #A3362A;
+    color: var(--cf-ink); background: var(--cf-ground); padding-bottom: 32px;
+}
+.cf-app *, .cf-app *::before, .cf-app *::after { box-sizing: border-box; }
+.cf-app a { color: var(--cf-primary); }
+.cf-muted { color: var(--cf-muted); }
+.cf-small { font-size: 13px; }
+.cf-optional { font-weight: 400; font-size: 13px; color: var(--cf-muted); }
+
+.cf-banner { background: #fff; border-bottom: 1px solid var(--cf-line); padding: 20px 24px 0; display: flex; flex-direction: column; gap: 14px; }
+.cf-banner.is-compact { padding-bottom: 20px; }
+.cf-crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; font-size: 14px; color: var(--cf-muted); }
+.cf-crumbs li + li::before { content: "/"; margin-right: 6px; }
+.cf-banner-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.cf-app .cf-banner-title { margin: 0; font-size: 28px; font-weight: 500; line-height: 1.15; }
+.cf-banner-sub { margin: 4px 0 0; font-size: 14px; color: var(--cf-muted); }
+.cf-banner-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.cf-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 0 -4px; }
+.cf-app a.cf-tab { padding: 12px 14px; color: var(--cf-muted); text-decoration: none; border-bottom: 3px solid transparent; }
+.cf-app a.cf-tab.is-current { color: var(--cf-primary); font-weight: 600; border-bottom-color: var(--cf-primary); }
+.cf-app a.cf-tab-back { margin-left: auto; }
+.cf-page { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+.cf-card { background: #fff; border: 1px solid var(--cf-line); border-radius: 8px; padding: 16px 18px; }
+.cf-h3 { font-size: 16px; margin: 0 0 10px; }
+.cf-app .cf-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 6px; font: inherit; font-size: 14px;
+    border: 1px solid var(--cf-line); background: #fff; color: var(--cf-primary); text-decoration: none; cursor: pointer;
+}
+.cf-app .cf-btn:hover { border-color: var(--cf-primary); }
+.cf-app .cf-btn.is-primary { background: var(--cf-primary); border-color: var(--cf-primary); color: #fff; }
+.cf-app .cf-btn.is-primary:hover { background: var(--cf-primary-dark); }
+.cf-link-danger { background: none; border: 0; padding: 0; color: var(--cf-danger); cursor: pointer; font: inherit; font-size: 14px; }
+.cf-icon { background: #fff; border: 1px solid var(--cf-line); border-radius: 6px; width: 34px; height: 34px; cursor: pointer; color: var(--cf-muted); }
+.cf-icon.is-danger:hover { color: var(--cf-danger); border-color: var(--cf-danger); }
+
+.cf-toolbar-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+.cf-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.cf-app a.cf-pill { padding: 6px 12px; border-radius: 16px; border: 1px solid var(--cf-line); background: #fff; text-decoration: none; font-size: 14px; color: var(--cf-ink); }
+.cf-app a.cf-pill.is-current { background: var(--cf-primary); border-color: var(--cf-primary); color: #fff; }
+.cf-count { opacity: .75; margin-left: 2px; }
+.cf-filter select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--cf-line); font: inherit; font-size: 14px; }
+
+.cf-scroll { overflow-x: auto; }
+.cf-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+.cf-table th, .cf-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--cf-line); vertical-align: top; }
+.cf-table th { font-weight: 600; color: var(--cf-muted); }
+.cf-table .es_list_sort { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: inherit; cursor: pointer; }
+.cf-row.is-new .cf-from { font-weight: 700; }
+.cf-from { display: block; }
+.cf-when { white-space: nowrap; color: var(--cf-muted); }
+.cf-wrap, .cf-from { overflow-wrap: anywhere; }
+.cf-reason { display: block; margin-top: 2px; }
+.cf-flag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 10px; background: #EAF1F3; font-size: 12px; font-weight: 600; color: var(--cf-muted); }
+.cf-flag.is-danger { background: #FBEDEB; color: var(--cf-danger); margin-left: 0; }
+.cf-flag.is-new { background: #E4F1F4; color: var(--cf-primary); margin-left: 0; }
+.cf-flag.is-handled { background: #E2F3E7; color: #1F5B33; margin-left: 0; }
+.cf-flag.is-spam { background: #FFF6E5; color: #5A3E00; margin-left: 0; }
+.cf-empty { color: var(--cf-muted); margin: 16px 0 4px; }
+.cf-list-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; font-size: 14px; color: var(--cf-muted); }
+
+.cf-menu { position: relative; display: inline-block; }
+.cf-menu > summary { list-style: none; cursor: pointer; padding: 2px 10px; border-radius: 6px; font-size: 18px; line-height: 1; }
+.cf-menu > summary::-webkit-details-marker { display: none; }
+.cf-menu[open] > summary, .cf-menu > summary:hover { background: #EAF1F3; }
+.cf-menu-panel { position: absolute; right: 0; z-index: 5; min-width: 140px; background: #fff; border: 1px solid var(--cf-line); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 6px 0; }
+.cf-menu-panel a, .cf-menu-panel button { display: block; width: 100%; text-align: left; padding: 6px 14px; text-decoration: none; }
+.cf-menu-panel form { margin: 0; }
+
+.cf-message { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.cf-answers { margin: 0; }
+.cf-answers dt { font-weight: 600; color: var(--cf-muted); font-size: 13px; text-transform: uppercase; letter-spacing: .03em; margin-top: 14px; }
+.cf-answers dt:first-child { margin-top: 0; }
+.cf-answers dd { margin: 4px 0 0; white-space: normal; overflow-wrap: anywhere; }
+.cf-side { display: flex; flex-direction: column; gap: 16px; }
+.cf-stack { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.cf-stack form, .cf-side form { margin: 0; }
+.cf-delete { padding: 0 4px; }
+
+.cf-builder-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+.cf-fieldset { margin: 0; min-width: 0; }
+.cf-fieldset > legend { font-size: 16px; font-weight: 600; padding: 0 6px; border: 0; width: auto; margin: 0; }
+.cf-bfield { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.cf-bfield > label { font-weight: 600; }
+.cf-builder input[type=text], .cf-builder select, .cf-builder textarea { width: 100%; padding: 7px 10px; border: 1px solid #B9CDD3; border-radius: 6px; font: inherit; background: #fff; }
+.cf-bfield.has-error input, .cf-row-edit.has-error { border-color: var(--cf-danger); }
+.cf-rows { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.cf-rows > li { margin: 0; }
+fieldset.cf-row-edit { margin: 0; min-width: 0; }
+.cf-row-error { grid-column: 1; margin: 0; }
+.cf-row-edit { border: 1px solid var(--cf-line); border-radius: 8px; padding: 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; background: #FBFDFD; }
+.cf-row-edit > label, .cf-row-main > label { display: flex; flex-direction: column; gap: 3px; font-size: 13px; font-weight: 600; color: var(--cf-muted); }
+.cf-row-main { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+.cf-row-main > label.cf-choice { flex-direction: row; align-items: center; padding-bottom: 8px; }
+.cf-row-options, .cf-row-help { grid-column: 1; }
+.cf-row-tools { grid-column: 2; grid-row: 1 / span 3; display: flex; flex-direction: column; gap: 6px; }
+.cf-savebar { display: flex; gap: 10px; margin-top: 16px; }
+
+@media (max-width: 800px) {
+    .cf-banner, .cf-page { padding-left: 16px; padding-right: 16px; }
+    .cf-message, .cf-builder-grid { grid-template-columns: 1fr; }
+    .cf-row-main { grid-template-columns: 1fr; }
+    .cf-row-tools { grid-column: 1; grid-row: auto; flex-direction: row; }
+    .cf-table thead { display: none; }
+    .cf-table tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--cf-line); }
+    .cf-table td { display: block; border: 0; padding: 2px 0; }
+    .cf-app a.cf-tab-back { margin-left: 0; }
+}

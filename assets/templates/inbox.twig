@@ -1,0 +1,25 @@
+{# The inbox shell: status pills, form filter, search box OUTSIDE the target.
+   The filter waits for its Show button: choosing an option must not reload
+   the page (WCAG 3.2.2), which arrowing through a select would. #}
+<div class="cf-toolbar-row">
+    <nav class="cf-pills" aria-label="Status">
+        {% for pill in pills %}
+            <a href="{{ pill.href|e('html_attr') }}" class="cf-pill{% if pill.current %} is-current{% endif %}"{% if pill.current %} aria-current="page"{% endif %}>{{ pill.label|e }} <span class="cf-count">{{ pill.count }}</span></a>
+        {% endfor %}
+    </nav>
+    {% if forms %}
+        <form method="get" action="{{ base|e('html_attr') }}" class="cf-filter">
+            <input type="hidden" name="status" value="{{ status|e('html_attr') }}">
+            <label for="cf_form_filter" class="cf-sr">Form</label>
+            <select id="cf_form_filter" name="form">
+                <option value="">Every form</option>
+                {% for f in forms %}<option value="{{ f.id }}"{% if f.current %} selected{% endif %}>{{ f.title|e }}</option>{% endfor %}
+            </select>
+            <button type="submit" class="cf-btn">Show</button>
+        </form>
+    {% endif %}
+</div>
+<div class="cf-card es_list">
+    {{ search_box|raw }}
+    <div id="{{ list_target }}">{{ list_html|raw }}</div>
+</div>

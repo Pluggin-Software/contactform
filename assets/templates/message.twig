@@ -1,0 +1,66 @@
+{# One message, and what can be done with it. Each action is its own small
+   POST form to set_status() or resend(). Autoescaped (the module's config.php). #}
+<div class="cf-message">
+    <section class="cf-card">
+        <p class="cf-muted">Received {{ when|e }}{% if m.sender_email %} from <a href="mailto:{{ m.sender_email|e('html_attr') }}">{{ m.sender_email|e }}</a>{% endif %}</p>
+        <dl class="cf-answers">
+            {% for item in data %}
+                <dt>{{ item.label|e }}</dt>
+                <dd dir="auto">{{ item.value ? item.value|e|nl2br : '<span class="cf-muted">—</span>' }}</dd>
+            {% endfor %}
+        </dl>
+    </section>
+
+    <aside class="cf-side">
+        <section class="cf-card">
+            <h2 class="cf-h3">Status</h2>
+            <p><span class="cf-flag is-{{ m.status|e('html_attr') }}">{{ statuses[m.status]|e }}</span>{% if m.status == 'handled' and handled %} <span class="cf-muted cf-small">{{ handled|e }}{% if handler %} by {{ handler|e }}{% endif %}</span>{% endif %}</p>
+            {% if m.status == 'spam' and m.spam_reason %}<p class="cf-small">Taken for spam because {{ m.spam_reason|lower }}. If a person sent it, move it to new and email it.</p>{% endif %}
+            <div class="cf-stack">
+                {% if m.sender_email %}<a class="cf-btn is-primary" href="mailto:{{ m.sender_email|e('html_attr') }}?subject={{ ('Re: ' ~ (m.form_title ?: 'your message'))|url_encode }}"><i class="fa-solid fa-reply" aria-hidden="true"></i> Reply by email</a>{% endif %}
+                {% for key, label in statuses %}
+                    {% if key != m.status %}
+                        <form method="post" action="{{ action|e('html_attr') }}">
+                            {{ csrf_field }}
+                            <input type="hidden" name="useclass" value="{{ useclass|e('html_attr') }}">
+                            <input type="hidden" name="usemethod" value="set_status">
+                            <input type="hidden" name="cf_submissions_id" value="{{ m.cf_submissions_id }}">
+                            <input type="hidden" name="status" value="{{ key }}">
+                            <button type="submit" class="cf-btn">{% if key == 'handled' %}Mark handled{% elseif key == 'new' %}{{ m.status == 'spam' ? 'Not spam: move to new' : 'Mark as new' }}{% else %}Mark as spam{% endif %}</button>
+                        </form>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="cf-card">
+            <h2 class="cf-h3">Email</h2>
+            {% if m.mailed is same as(null) %}
+                <p class="cf-muted">Not emailed{% if m.status == 'spam' %}: it looked like spam{% endif %}.</p>
+            {% elseif mail_failed %}
+                <p class="cf-flag is-danger">It could not be emailed.</p>
+                {% if m.mail_error %}<p class="cf-small cf-muted">{{ m.mail_error|e }}</p>{% endif %}
+            {% else %}
+                <p class="cf-muted">Sent to {{ m.recipients|e }}.</p>
+            {% endif %}
+            {% if m.mailed is same as(null) or mail_failed %}
+                <form method="post" action="{{ action|e('html_attr') }}">
+                    {{ csrf_field }}
+                    <input type="hidden" name="useclass" value="{{ useclass|e('html_attr') }}">
+                    <input type="hidden" name="usemethod" value="resend">
+                    <input type="hidden" name="cf_submissions_id" value="{{ m.cf_submissions_id }}">
+                    <button type="submit" class="cf-btn">Email it now</button>
+                </form>
+            {% endif %}
+        </section>
+
+        <form method="post" action="{{ action|e('html_attr') }}" class="cf-delete" data-cf-confirm="Delete this message? It cannot be brought back from here.">
+            {{ csrf_field }}
+            <input type="hidden" name="useclass" value="{{ useclass|e('html_attr') }}">
+            <input type="hidden" name="usemethod" value="set_status">
+            <input type="hidden" name="cf_submissions_id" value="{{ m.cf_submissions_id }}">
+            <input type="hidden" name="status" value="deleted">
+            <button type="submit" class="cf-link-danger"><i class="fa-solid fa-trash" aria-hidden="true"></i> Delete message</button>
+        </form>
+    </aside>
+</div>

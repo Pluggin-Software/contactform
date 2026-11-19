@@ -1,0 +1,9 @@
+{
+  "name": "ContactForm",
+  "title": "Contact Form",
+  "description": "Build contact forms for your site's pages and read every message in one inbox, with spam set aside for you to judge.",
+  "author": "Kevin Bruce",
+  "version": "1.0.9",
+  "core": "2.99.0",
+  "requires": []
+}

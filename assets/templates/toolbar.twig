@@ -1,0 +1,5 @@
+{# Above the public form, for staff who read its messages. #}
+<div class="cf-toolbar">
+    <a href="{{ inbox|e('html_attr') }}"><i class="fa-solid fa-inbox" aria-hidden="true"></i> Inbox{% if new %} <span class="cf-badge">{{ new }} new</span>{% endif %}</a>
+    {% if forms %}<a href="{{ forms|e('html_attr') }}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Edit forms</a>{% endif %}
+</div>

@@ -1,0 +1,84 @@
+{# The public contact form: ContactForm::rout_index(), sent to submit_message().
+   It posts to its own page, so a refused message renders again with what was
+   typed. The honeypot is hidden from people and from screen readers; a bot
+   that fills it is answered as if its message went, and the message is kept
+   in Spam (1.0.1). data-cf-draft lets javascript.js keep a copy of what is
+   typed in this tab, so a refused token or a lost session cannot wipe it.
+   Autoescaped (the module's config.php). #}
+<div class="cf-public" id="cf-form-{{ form.cf_forms_id }}">
+    {% if form.title %}<h2 class="cf-title">{{ form.title|e }}</h2>{% endif %}
+    {% if form.intro %}<p class="cf-intro">{{ form.intro|e|nl2br }}</p>{% endif %}
+
+    {% if errors %}
+        <div class="cf-errors" role="alert" tabindex="-1">
+            {% if errors.form %}
+                <p>{{ errors.form|e }}</p>
+            {% else %}
+                <p><strong>Your message was not sent yet.</strong> {{ error_list|length == 1 ? 'One answer needs' : error_list|length ~ ' answers need' }} another look:</p>
+                <ul>
+                    {% for item in error_list %}
+                        <li><a href="#{{ item.target|e('html_attr') }}">{{ item.label|e }}: {{ item.message|e }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <form class="cf-form" action="{{ action|e('html_attr') }}" method="post" novalidate data-cf-draft="{{ form.cf_forms_id }}">
+        {{ csrf_field }}
+        <input type="hidden" name="useclass" value="{{ useclass|e('html_attr') }}">
+        <input type="hidden" name="usemethod" value="submit_message">
+        <input type="hidden" name="cf_form" value="{{ form.cf_forms_id|e('html_attr') }}">
+        {% if page_id %}<input type="hidden" name="cf_page" value="{{ page_id }}">{% endif %}
+
+        <div class="cf-hp" aria-hidden="true">
+            <label for="cf_hp_{{ form.cf_forms_id }}">Do not fill this in</label>
+            <input type="text" id="cf_hp_{{ form.cf_forms_id }}" name="{{ honeypot|e('html_attr') }}" value="" tabindex="-1" autocomplete="off" data-cf-nodraft>
+        </div>
+
+        {% for f in fields %}
+            {% set described = (f.help ? f.input_id ~ '_help' : '') ~ (f.error ? ' ' ~ f.input_id ~ '_err' : '') %}
+            {% set aria = (described|trim ? ' aria-describedby="' ~ described|trim|e('html_attr') ~ '"' : '') ~ (f.error ? ' aria-invalid="true"' : '') %}
+            <div class="cf-field cf-type-{{ f.field_type|e('html_attr') }}{% if f.error %} has-error{% endif %}">
+                {% if f.field_type == 'radio' or f.field_type == 'checkboxes' %}
+                    <fieldset{% if described|trim %} aria-describedby="{{ described|trim|e('html_attr') }}"{% endif %}>
+                        <legend>{{ f.label|e }}{% if f.is_required %} <span class="cf-req" aria-hidden="true">*</span><span class="cf-sr"> (required)</span>{% endif %}</legend>
+                        {% for choice in f.choices %}
+                            <label class="cf-choice">
+                                {% if f.field_type == 'radio' %}
+                                    <input type="radio" id="{{ loop.first ? f.input_id : f.input_id ~ '_' ~ loop.index }}" name="{{ f.name|e('html_attr') }}" value="{{ choice|e('html_attr') }}"{% if f.value == choice %} checked{% endif %}{% if f.error %} aria-invalid="true"{% endif %}>
+                                {% else %}
+                                    <input type="checkbox" id="{{ loop.first ? f.input_id : f.input_id ~ '_' ~ loop.index }}" name="{{ f.name|e('html_attr') }}[]" value="{{ choice|e('html_attr') }}"{% if choice in f.value %} checked{% endif %}{% if f.error %} aria-invalid="true"{% endif %}>
+                                {% endif %}
+                                <span dir="auto">{{ choice|e }}</span>
+                            </label>
+                        {% endfor %}
+                    </fieldset>
+                {% elseif f.field_type == 'checkbox' %}
+                    <label class="cf-choice">
+                        <input type="checkbox" id="{{ f.input_id }}" name="{{ f.name|e('html_attr') }}" value="1"{% if f.value %} checked{% endif %}{{ aria|raw }}>
+                        {{ f.label|e }}{% if f.is_required %} <span class="cf-req" aria-hidden="true">*</span><span class="cf-sr"> (required)</span>{% endif %}
+                    </label>
+                {% else %}
+                    <label for="{{ f.input_id }}">{{ f.label|e }}{% if f.is_required %} <span class="cf-req" aria-hidden="true">*</span><span class="cf-sr"> (required)</span>{% endif %}</label>
+                    {% if f.field_type == 'textarea' %}
+                        <textarea id="{{ f.input_id }}" name="{{ f.name|e('html_attr') }}" rows="6" maxlength="10000" dir="auto"{% if f.is_required %} required{% endif %}{{ aria|raw }}>{{ f.value|e }}</textarea>
+                    {% elseif f.field_type == 'select' %}
+                        <select id="{{ f.input_id }}" name="{{ f.name|e('html_attr') }}"{% if f.is_required %} required{% endif %}{{ aria|raw }}>
+                            <option value="">Choose…</option>
+                            {% for choice in f.choices %}<option value="{{ choice|e('html_attr') }}"{% if f.value == choice %} selected{% endif %}>{{ choice|e }}</option>{% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="{{ f.field_type == 'email' ? 'email' : (f.field_type == 'tel' ? 'tel' : 'text') }}" id="{{ f.input_id }}" name="{{ f.name|e('html_attr') }}" value="{{ f.value|e('html_attr') }}" maxlength="500"{% if f.field_type == 'text' %} dir="auto"{% endif %}{% if f.field_type == 'email' %} autocomplete="email" spellcheck="false"{% elseif f.field_type == 'tel' %} autocomplete="tel"{% elseif 'name' in f.label|lower %} autocomplete="name"{% endif %}{% if f.is_required %} required{% endif %}{{ aria|raw }}>
+                    {% endif %}
+                {% endif %}
+                {% if f.help %}<span class="cf-help" id="{{ f.input_id }}_help">{{ f.help|e }}</span>{% endif %}
+                {% if f.error %}<span class="cf-error" id="{{ f.input_id }}_err">{{ f.error|e }}</span>{% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="cf-actions">
+            <button type="submit" class="btn btn-primary cf-send" data-cf-sending="Sending…">{{ (form.submit_label ?: 'Send')|e }}</button>
+        </div>
+    </form>
+</div>

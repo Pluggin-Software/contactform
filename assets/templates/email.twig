@@ -1,0 +1,12 @@
+{# The notice to a form's recipients. Every answer is escaped; nothing a visitor
+   typed is ever markup. Wrapped in the site theme by Mailer. #}
+<p>A message came in through <strong>{{ form.title|e }}</strong>.</p>
+<table cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:640px">
+    {% for item in data %}
+        <tr>
+            <th align="left" valign="top" style="border-bottom:1px solid #ddd;width:30%">{{ item.label|e }}</th>
+            <td valign="top" style="border-bottom:1px solid #ddd">{{ item.value ? item.value|e|nl2br : '<span style="color:#888">—</span>' }}</td>
+        </tr>
+    {% endfor %}
+</table>
+<p>{% if reply %}Reply to this email to answer {{ reply|e }} directly. {% endif %}<a href="{{ link|e('html_attr') }}">Open it in the inbox</a> to mark it handled.</p>

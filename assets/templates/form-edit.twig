@@ -1,0 +1,144 @@
+{# The form builder: ContactForm::builder_page(), saved by save_form(). The
+   settings, then the fields as rows the person can add, remove and reorder
+   (javascript.js). Rows post as fields[n][...] in display order; a new row has
+   no cf_fields_id. A refused save renders again with what was typed.
+   Autoescaped (the module's config.php). #}
+<form class="cf-builder" action="{{ action|e('html_attr') }}" method="post" novalidate>
+    {{ csrf_field }}
+    <input type="hidden" name="useclass" value="{{ useclass|e('html_attr') }}">
+    <input type="hidden" name="usemethod" value="save_form">
+    <input type="hidden" name="cf_forms_id" value="{{ form.cf_forms_id|e('html_attr') }}">
+
+    {% if errors %}
+        <div class="cf-errors" role="alert" tabindex="-1">
+            <strong>The form was not saved.</strong>
+            <ul>{% for message in errors %}<li>{{ message|e }}</li>{% endfor %}</ul>
+        </div>
+    {% endif %}
+
+    <div class="cf-builder-grid">
+        <fieldset class="cf-card cf-fieldset">
+            <legend>The form</legend>
+
+            <div class="cf-bfield{% if errors.title %} has-error{% endif %}">
+                <label for="cf_title">Name</label>
+                <input type="text" id="cf_title" name="form[title]" value="{{ form.title|e('html_attr') }}" maxlength="200" required dir="auto" aria-describedby="cf_title_help{% if errors.title %} cf_title_err{% endif %}"{% if errors.title %} aria-invalid="true"{% endif %}>
+                <span class="cf-help" id="cf_title_help">Shown as the heading over the form, and how the inbox names it.</span>
+                {% if errors.title %}<span class="cf-error" id="cf_title_err">{{ errors.title|e }}</span>{% endif %}
+            </div>
+
+            <div class="cf-bfield">
+                <label for="cf_intro">Introduction <span class="cf-optional">optional</span></label>
+                <textarea id="cf_intro" name="form[intro]" rows="3" dir="auto">{{ form.intro|e }}</textarea>
+            </div>
+
+            <div class="cf-bfield{% if errors.recipients %} has-error{% endif %}">
+                <label for="cf_recipients">Send messages to</label>
+                <input type="text" id="cf_recipients" name="form[recipients]" value="{{ form.recipients|e('html_attr') }}" required spellcheck="false" aria-describedby="cf_recipients_help{% if errors.recipients %} cf_recipients_err{% endif %}"{% if errors.recipients %} aria-invalid="true"{% endif %}>
+                <span class="cf-help" id="cf_recipients_help">One or more email addresses, separated by commas. Each message is also kept in the inbox.</span>
+                {% if errors.recipients %}<span class="cf-error" id="cf_recipients_err">{{ errors.recipients|e }}</span>{% endif %}
+            </div>
+
+            <div class="cf-bfield">
+                <label for="cf_prefix">Email subject starts with <span class="cf-optional">optional</span></label>
+                <input type="text" id="cf_prefix" name="form[subject_prefix]" value="{{ form.subject_prefix|e('html_attr') }}" maxlength="100" placeholder="[Website]">
+            </div>
+
+            <div class="cf-bfield">
+                <label for="cf_thanks">After sending, say <span class="cf-optional">optional</span></label>
+                <textarea id="cf_thanks" name="form[thank_you]" rows="2" dir="auto" placeholder="Thank you. Your message has been sent.">{{ form.thank_you|e }}</textarea>
+            </div>
+
+            <div class="cf-bfield">
+                <label for="cf_submit">Send button reads <span class="cf-optional">optional</span></label>
+                <input type="text" id="cf_submit" name="form[submit_label]" value="{{ form.submit_label|e('html_attr') }}" maxlength="60" placeholder="Send">
+            </div>
+
+            <label class="cf-choice">
+                <input type="checkbox" name="form[is_active]" value="1"{% if form.is_active %} checked{% endif %}>
+                Taking messages
+            </label>
+            <span class="cf-help">Untick to close the form; its page says it is not taking messages.</span>
+
+            {% if pages %}
+                <p class="cf-help">Shown on: {% for p in pages %}<a href="{{ p.url|e('html_attr') }}">{{ p.title|e }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+            {% elseif form.cf_forms_id %}
+                <p class="cf-help">No page shows this form yet. Pick it in a page's settings, under its app.</p>
+            {% endif %}
+        </fieldset>
+
+        <fieldset class="cf-card cf-fieldset{% if errors.fields %} has-error{% endif %}">
+            <legend>Fields</legend>
+            {% if errors.fields %}<p class="cf-error" id="cf_fields_err">{{ errors.fields|e }}</p>{% endif %}
+            <ol class="cf-rows" data-cf-rows>
+                {% for f in fields %}
+                    {% set n = loop.index0 %}{% set err = errors['field.' ~ n] ?? '' %}{% set name = f.label ?: 'new field' %}
+                    <li data-cf-row>
+                        <fieldset class="cf-row-edit{% if err %} has-error{% endif %}">
+                            <legend class="cf-sr" data-cf-legend>Field {{ n + 1 }}: {{ name|e }}</legend>
+                            <input type="hidden" data-cf-name="cf_fields_id" name="fields[{{ n }}][cf_fields_id]" value="{{ f.cf_fields_id|e('html_attr') }}">
+                            <div class="cf-row-main">
+                                <label>Label <input type="text" data-cf-name="label" name="fields[{{ n }}][label]" value="{{ f.label|e('html_attr') }}" maxlength="200" dir="auto"{% if err %} aria-invalid="true" aria-describedby="cf_row_err_{{ n }}"{% endif %}></label>
+                                <label>Kind
+                                    <select data-cf-name="field_type" name="fields[{{ n }}][field_type]" data-cf-type>
+                                        {% for key, label in types %}<option value="{{ key }}"{% if f.field_type == key %} selected{% endif %}>{{ label|e }}</option>{% endfor %}
+                                    </select>
+                                </label>
+                                <label class="cf-choice"><input type="checkbox" data-cf-name="is_required" name="fields[{{ n }}][is_required]" value="1"{% if f.is_required %} checked{% endif %}> Required</label>
+                            </div>
+                            <label class="cf-row-options" data-cf-options{% if f.field_type not in choice_types %} hidden{% endif %}>Choices, one per line
+                                <textarea data-cf-name="options" name="fields[{{ n }}][options]" rows="3" dir="auto">{{ f.options|e }}</textarea>
+                            </label>
+                            <label class="cf-row-help">Help <span class="cf-optional">optional</span>
+                                <input type="text" data-cf-name="help" name="fields[{{ n }}][help]" value="{{ f.help|e('html_attr') }}" maxlength="500" dir="auto">
+                            </label>
+                            {% if err %}<p class="cf-error cf-row-error" id="cf_row_err_{{ n }}">{{ err|e }}</p>{% endif %}
+                            <div class="cf-row-tools">
+                                <button type="button" class="cf-icon" data-cf-up aria-label="Move {{ name|e('html_attr') }} up"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></button>
+                                <button type="button" class="cf-icon" data-cf-down aria-label="Move {{ name|e('html_attr') }} down"><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></button>
+                                <button type="button" class="cf-icon is-danger" data-cf-remove aria-label="Remove {{ name|e('html_attr') }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                            </div>
+                        </fieldset>
+                    </li>
+                {% endfor %}
+            </ol>
+            <button type="button" class="cf-btn" data-cf-add><i class="fa-solid fa-plus" aria-hidden="true"></i> Add a field</button>
+            <p class="cf-help">A field labelled with "name" becomes the sender's name in the inbox, and the first email field is where a reply goes.</p>
+            <p class="cf-sr" aria-live="polite" data-cf-announce></p>
+
+            <template data-cf-template>
+                <li data-cf-row>
+                    <fieldset class="cf-row-edit">
+                        <legend class="cf-sr" data-cf-legend>New field</legend>
+                        <input type="hidden" data-cf-name="cf_fields_id" value="">
+                        <div class="cf-row-main">
+                            <label>Label <input type="text" data-cf-name="label" value="" maxlength="200" dir="auto"></label>
+                            <label>Kind
+                                <select data-cf-name="field_type" data-cf-type>
+                                    {% for key, label in types %}<option value="{{ key }}">{{ label|e }}</option>{% endfor %}
+                                </select>
+                            </label>
+                            <label class="cf-choice"><input type="checkbox" data-cf-name="is_required" value="1"> Required</label>
+                        </div>
+                        <label class="cf-row-options" data-cf-options hidden>Choices, one per line
+                            <textarea data-cf-name="options" rows="3" dir="auto"></textarea>
+                        </label>
+                        <label class="cf-row-help">Help <span class="cf-optional">optional</span>
+                            <input type="text" data-cf-name="help" value="" maxlength="500" dir="auto">
+                        </label>
+                        <div class="cf-row-tools">
+                            <button type="button" class="cf-icon" data-cf-up aria-label="Move new field up"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></button>
+                            <button type="button" class="cf-icon" data-cf-down aria-label="Move new field down"><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></button>
+                            <button type="button" class="cf-icon is-danger" data-cf-remove aria-label="Remove new field"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                        </div>
+                    </fieldset>
+                </li>
+            </template>
+        </fieldset>
+    </div>
+
+    <div class="cf-savebar">
+        <button type="submit" class="cf-btn is-primary">Save form</button>
+        <a href="{{ cancel|e('html_attr') }}" class="cf-btn">Cancel</a>
+    </div>
+</form>

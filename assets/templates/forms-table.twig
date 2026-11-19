@@ -1,0 +1,40 @@
+{# The forms fragment: ContactForm::forms_table(). Delete sits in a ⋯ menu. #}
+{% if rows %}
+    <table class="cf-table">
+        <thead><tr>{{ list.th.title|raw }}<th>Shown on</th>{{ list.th.messages|raw }}{{ list.th.latest|raw }}<th><span class="cf-sr">Actions</span></th></tr></thead>
+        <tbody>
+            {% for r in rows %}
+                <tr>
+                    <td data-label="Form">
+                        <a href="{{ r.edit|e('html_attr') }}" class="cf-from">{{ r.title|e }}</a>
+                        {% if not r.is_active %}<span class="cf-flag">Closed</span>{% endif %}
+                        <span class="cf-muted cf-small">{{ r.fields }} field{{ r.fields == 1 ? '' : 's' }} · to {{ r.recipients|e }}</span>
+                    </td>
+                    <td data-label="Shown on">
+                        {% for p in r.pages %}<a href="{{ p.url|e('html_attr') }}">{{ p.title|e }}</a>{% if not loop.last %}, {% endif %}{% else %}<span class="cf-muted">No page picks it</span>{% endfor %}
+                    </td>
+                    <td data-label="Messages"><a href="{{ r.inbox|e('html_attr') }}">{{ r.messages }}</a>{% if r.fresh %} <span class="cf-badge">{{ r.fresh }} new</span>{% endif %}</td>
+                    <td data-label="Latest">{{ r.latest_label|e }}</td>
+                    <td class="cf-menu-cell">
+                        <details class="cf-menu">
+                            <summary aria-label="More for {{ r.title|e('html_attr') }}">⋯</summary>
+                            <div class="cf-menu-panel">
+                                <a href="{{ r.edit|e('html_attr') }}">Edit</a>
+                                <form method="post" action="{{ action|e('html_attr') }}" data-cf-confirm="Delete &quot;{{ r.title|e('html_attr') }}&quot;? Its messages stay in the inbox, and a page showing it will show nothing.">
+                                    {{ csrf_field }}
+                                    <input type="hidden" name="useclass" value="{{ useclass|e('html_attr') }}">
+                                    <input type="hidden" name="usemethod" value="delete_form">
+                                    <input type="hidden" name="cf_forms_id" value="{{ r.cf_forms_id }}">
+                                    <button type="submit" class="cf-link-danger">Delete</button>
+                                </form>
+                            </div>
+                        </details>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="cf-empty">{% if searched %}No form matches that search.{% else %}There are no forms yet. Press <strong>New form</strong> to make one.{% endif %}</p>
+{% endif %}
+<div class="cf-list-foot">{{ list.count|raw }}{{ list.pager|raw }}</div>

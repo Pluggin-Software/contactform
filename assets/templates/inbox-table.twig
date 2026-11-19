@@ -1,0 +1,29 @@
+{# The inbox fragment: ContactForm::inbox_table(), for the page and every redraw. #}
+{% if rows %}
+    <div class="cf-scroll">
+        <table class="cf-table">
+            <thead><tr>{{ list.th.received|raw }}{{ list.th.from|raw }}<th>Message</th>{{ list.th.form|raw }}</tr></thead>
+            <tbody>
+                {% for r in rows %}
+                    <tr class="cf-row is-{{ r.status|e('html_attr') }}">
+                        <td class="cf-when" data-label="Received">{{ r.when|e }}</td>
+                        <td data-label="From">
+                            <a href="{{ r.href|e('html_attr') }}" class="cf-from" dir="auto">{% if r.status == 'new' %}<span class="cf-sr">New: </span>{% endif %}{{ (r.sender_name ?: r.sender_email ?: 'Unnamed')|e }}</a>
+                            {% if r.sender_name and r.sender_email %}<span class="cf-muted cf-small cf-wrap">{{ r.sender_email|e }}</span>{% endif %}
+                        </td>
+                        <td data-label="Message" class="cf-wrap">
+                            <span dir="auto">{{ r.preview|e }}</span>
+                            {% if r.status == 'spam' and r.spam_reason %}<span class="cf-muted cf-small cf-reason">{{ r.spam_reason|e }}</span>{% endif %}
+                            {% if r.mail_failed %}<span class="cf-flag is-danger">Email failed</span>{% endif %}
+                            {% if status == 'all' and r.status != 'new' %}<span class="cf-flag">{{ r.status|capitalize|e }}</span>{% endif %}
+                        </td>
+                        <td data-label="Form">{{ (r.form_title ?: 'Deleted form')|e }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="cf-empty">{% if searched %}No message matches that search.{% elseif status == 'new' %}Nothing new. Every message has been dealt with.{% else %}No messages here.{% endif %}</p>
+{% endif %}
+<div class="cf-list-foot">{{ list.count|raw }}{{ list.pager|raw }}</div>
